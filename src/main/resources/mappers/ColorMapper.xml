@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.time.demo.mapper.ColorMapper">
+    <resultMap id="BaseResultMap"
+               type="com.time.demo.entity.Color">
+        <id column="ColorId" jdbcType="INTEGER" property="colorId"/>
+        <result column="ProductId" jdbcType="INTEGER"
+                property="productId"/>
+        <result column="Color" jdbcType="VARCHAR" property="color"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+		ColorId, ProductId, Color
+	</sql>
+
+    <insert id="insertColorList" parameterType="java.util.ArrayList">
+        insert into mi_product_color (productid,color)
+        values
+        <foreach collection="list" item="color"
+                 separator=",">
+            (#{color.productId,jdbcType=INTEGER},
+            #{color.color,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+    <update id="updateColorList" parameterType="java.util.ArrayList">
+        <foreach collection="list" item="color" index="index" separator=";">
+            update mi_product_color
+            <set>
+                <if test="color.color != null and color.color !=''">
+                    Color = #{color.color,jdbcType=VARCHAR}
+                </if>
+            </set>
+            where ProductId = #{color.productId,jdbcType=INTEGER}
+        </foreach>
+    </update>
+    <delete id="deleteColorList"
+            parameterType="java.lang.Integer">
+		delete from mi_product_color
+		where ProductId =
+		#{productId,jdbcType=INTEGER}
+	</delete>
+
+</mapper>

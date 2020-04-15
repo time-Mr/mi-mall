@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.time.demo.mapper.ConfMapper">
+    <resultMap id="BaseResultMap"
+               type="com.time.demo.entity.Conf">
+        <id column="ConfId" jdbcType="INTEGER" property="confId"/>
+        <result column="ProductId" jdbcType="INTEGER"
+                property="productId"/>
+        <result column="Conf" jdbcType="VARCHAR" property="conf"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+		ConfId, ProductId, Conf
+	</sql>
+
+    <insert id="insertConfList" parameterType="java.util.ArrayList">
+        insert into mi_product_conf (productid,conf)
+        values
+        <foreach collection="list" item="conf" separator=",">
+            (#{conf.productId,jdbcType=INTEGER},
+            #{conf.conf,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+    <update id="updateConfList" parameterType="java.util.ArrayList">
+        <foreach collection="list" item="conf" index="index" separator=";">
+            update mi_product_conf
+            <set>
+                <if test="conf.conf != null and conf.conf !=''">
+                    Conf = #{conf.conf,jdbcType=VARCHAR}
+                </if>
+            </set>
+            where ProductId = #{conf.productId,jdbcType=INTEGER}
+        </foreach>
+    </update>
+    <delete id="deleteConfList"
+            parameterType="java.lang.Integer">
+		delete from mi_product_conf
+		where ProductId =
+		#{productId,jdbcType=INTEGER}
+	</delete>
+
+</mapper>

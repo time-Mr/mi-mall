@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.time.demo.mapper.ProductMapper">
+    <sql id="Base_Column_List">
+		ProId, ProType, Name, Picture1, Picture2, Picture3,
+		RedNote, GrayNote,
+		Price
+	</sql>
+    <sql id="Base_Column_List2">
+		p.proId,p.proType,p.Name,p.Picture1,p.Picture2,p.Picture3,p.RedNote,p.GrayNote,p.CurrentPrice,p.OriginalPrice,f.Confid,f.ProductId,
+		f.Conf,c.ColorId,c.ProductId,c.Color,m.Mealid,m.ProductId,m.Meal
+	</sql>
+
+    <resultMap id="BaseResultMap"
+               type="com.time.demo.entity.Product">
+        <id column="ProId" jdbcType="INTEGER" property="proId"/>
+        <result column="ProType" jdbcType="VARCHAR" property="proType"/>
+        <result column="Name" jdbcType="VARCHAR" property="name"/>
+        <result column="Picture1" jdbcType="VARCHAR"
+                property="picture1"/>
+        <result column="Picture2" jdbcType="VARCHAR"
+                property="picture2"/>
+        <result column="Picture3" jdbcType="VARCHAR"
+                property="picture3"/>
+        <result column="RedNote" jdbcType="VARCHAR" property="redNote"/>
+        <result column="GrayNote" jdbcType="VARCHAR"
+                property="grayNote"/>
+        <result column="CurrentPrice" jdbcType="DOUBLE"
+                property="currentPrice"/>
+        <result column="OriginalPrice" jdbcType="DOUBLE"
+                property="originalPrice"/>
+        <result column="Sales" jdbcType="BIGINT"
+                property="sales"/>
+
+        <collection property="conf"
+                    ofType="com.time.demo.entity.Conf">
+            <id property="confId" column="Confid"/>
+            <result property="productId" column="ProductId"/>
+            <result property="conf" column="Conf"/>
+        </collection>
+
+        <collection property="color"
+                    ofType="com.time.demo.entity.Color">
+            <id property="colorId" column="ColorId"/>
+            <result property="productId" column="ProductId"/>
+            <result property="color" column="Color"/>
+        </collection>
+
+        <collection property="meal"
+                    ofType="com.time.demo.entity.Meal">
+            <id property="mealId" column="MealId"/>
+            <result property="productId" column="ProductId"/>
+            <result property="meal" column="Meal"/>
+        </collection>
+
+    </resultMap>
+    <select id="selectAll" resultMap="BaseResultMap"
+            parameterType="java.util.Map">
+        select p.* ,f.*,c.*,m.*
+        from (select * FROM mi_productlist a
+        <where>
+            1 = 1
+            <if test="proType != null">
+                and ProType like "%"#{proType}"%"
+            </if>
+            <if test="proName != null">
+                and Name like "%"#{proName}"%"
+            </if>
+        </where>
+        order by a.ProId asc
+        <if test="start != null and number != null">
+            limit ${(start-1)*number}, ${number}
+        </if>
+        )as p
+        left join
+        mimall.mi_product_conf f
+        on f.productId = p.proId
+        left join
+        mimall.mi_product_color c
+        on c.productId = p.proId
+        left join
+        mimall.mi_product_meal m
+        on m.productId = p.proId
+        and p.proId =0
+        and
+        f.productId = 0
+        and c.productId = 0
+        and m.productId = 0
+        order by p.proId
+        asc,f.productId asc ,c.productId
+        asc,m.productId asc
+    </select>
+    <select id="selectAllToExcel" resultMap="BaseResultMap"
+            parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List2"/>
+        from mi_productlist p,mi_product_conf
+        f,mi_product_color
+        c,mi_product_meal m
+        where p.proId = c.productId
+        and
+        p.proId =
+        f.productId
+        and p.proId = m.productId
+    </select>
+    <select id="selectTotalCount" resultType="INTEGER">
+		select
+		count(*)
+		from
+		mi_productlist
+	</select>
+
+    <select id="selectByProductName"
+            parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List2"/>
+        from mi_productlist p
+        left join
+        mimall.mi_product_conf f
+        on f.productId = p.proId
+        left join
+        mimall.mi_product_color c
+        on c.productId = p.proId
+        left join
+        mimall.mi_product_meal m
+        on m.productId = p.proId
+        where p.Name=#{productName,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectByPrimaryKey"
+            parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List2"/>
+        from mi_productlist p
+        left join
+        mimall.mi_product_conf f
+        on f.productId = p.proId
+        left join
+        mimall.mi_product_color c
+        on c.productId = p.proId
+        left join
+        mimall.mi_product_meal m
+        on m.productId = p.proId
+        where
+        p.proId=#{productId,jdbcType=VARCHAR}
+    </select>
+
+    <insert id="insertProduct"
+            parameterType="com.time.demo.entity.Product" useGeneratedKeys="true">
+        <selectKey keyProperty="proId" resultType="int"
+                   order="AFTER">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey>
+        insert into mi_productlist
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="proType != null">
+                ProType,
+            </if>
+            <if test="name != null">
+                Name,
+            </if>
+            <if test="picture1 != null">
+                Picture1,
+            </if>
+            <if test="picture2 != null">
+                Picture2,
+            </if>
+            <if test="picture3 != null">
+                Picture3,
+            </if>
+            <if test="redNote != null">
+                RedNote,
+            </if>
+            <if test="grayNote != null">
+                GrayNote,
+            </if>
+            <if test="currentPrice != null">
+                CurrentPrice,
+            </if>
+            <if test="originalPrice != null">
+                OriginalPrice,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="proType != null">
+                #{proType,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="picture1 != null">
+                #{picture1,jdbcType=VARCHAR},
+            </if>
+            <if test="picture2 != null">
+                #{picture2,jdbcType=VARCHAR},
+            </if>
+            <if test="picture3 != null">
+                #{picture3,jdbcType=VARCHAR},
+            </if>
+            <if test="redNote != null">
+                #{redNote,jdbcType=VARCHAR},
+            </if>
+            <if test="grayNote != null">
+                #{grayNote,jdbcType=VARCHAR},
+            </if>
+            <if test="currentPrice != null">
+                #{currentPrice,jdbcType=DOUBLE},
+            </if>
+            <if test="originalPrice != null">
+                #{originalPrice,jdbcType=DOUBLE},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateProduct"
+            parameterType="com.time.demo.entity.Product" useGeneratedKeys="true">
+        update mi_productlist
+        <set>
+            <if test="proType != null">
+                ProType = #{proType,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                Name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="picture1 != null">
+                Picture1 = #{picture1,jdbcType=VARCHAR},
+            </if>
+            <if test="picture2 != null">
+                Picture2 = #{picture2,jdbcType=VARCHAR},
+            </if>
+            <if test="picture3 != null">
+                Picture3 = #{picture3,jdbcType=VARCHAR},
+            </if>
+            <if test="redNote != null">
+                RedNote = #{redNote,jdbcType=VARCHAR},
+            </if>
+            <if test="grayNote != null">
+                GrayNote = #{grayNote,jdbcType=VARCHAR},
+            </if>
+            <if test="currentPrice != null">
+                CurrentPrice = #{currentPrice,jdbcType=DOUBLE},
+            </if>
+            <if test="originalPrice != null">
+                OriginalPrice = #{originalPrice,jdbcType=DOUBLE},
+            </if>
+        </set>
+        where ProId = #{proId,jdbcType=INTEGER}
+    </update>
+
+    <delete id="deleteByPrimaryKey"
+            parameterType="java.lang.Integer">
+		delete from mi_productlist
+		where ProId =
+		#{proId,jdbcType=INTEGER}
+	</delete>
+
+    <update id="addSales" parameterType="com.time.demo.entity.Product">
+        update mi_productlist set Sales = #{sales,jdbcType = INTEGER}
+        where Name = #{name,jdbcType=VARCHAR}
+    </update>
+
+    <select id="selectTotality" parameterType="string" resultType="long">
+        SELECT Totality from mi_productlist where Name = #{name,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectToOrderBy" resultMap="BaseResultMap">
+        SELECT Name,ProType,CurrentPrice,Sales from mimall.mi_productlist where Sales >0 order by Sales desc limit 0,6;
+    </select>
+
+    <update id="deletePicture" parameterType="map">
+        update mi_productlist set
+        <if test="picture1 != null and picture != ''">
+            Picture1 = ''
+        </if>
+        <if test="picture2 != null and picture != ''">
+            Picture2 = ''
+        </if>
+        <if test="picture2 != null and picture != ''">
+            Picture3 = ''
+        </if>
+        where Name = #{name};
+    </update>
+</mapper>

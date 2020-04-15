@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.time.demo.mapper.MealMapper">
+    <resultMap id="BaseResultMap"
+               type="com.time.demo.entity.Meal">
+        <id column="MealId" jdbcType="INTEGER" property="mealId"/>
+        <result column="ProductId" jdbcType="INTEGER"
+                property="productId"/>
+        <result column="Meal" jdbcType="VARCHAR" property="meal"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+		Mealid, ProductId, Meal
+	</sql>
+
+    <insert id="insertMealList" parameterType="java.util.ArrayList">
+        insert into mi_product_meal (productid,meal)
+        values
+        <foreach collection="list" item="meal"
+                 separator=",">
+            (#{meal.productId,jdbcType=INTEGER},
+            #{meal.meal,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+
+    <update id="updateMealList" parameterType="java.util.ArrayList">
+        <foreach collection="list" item="meal" index="index" separator=";">
+            update mi_product_meal
+            <set>
+                <if test="meal.meal != null and meal.meal !=''">
+                    Meal = #{meal.meal}
+                </if>
+            </set>
+            where ProductId = #{meal.productId}
+        </foreach>
+    </update>
+
+    <delete id="deleteMealList"
+            parameterType="java.lang.Integer">
+		delete from mi_product_meal
+		where ProductId =
+		#{productId,jdbcType=INTEGER}
+	</delete>
+
+</mapper>

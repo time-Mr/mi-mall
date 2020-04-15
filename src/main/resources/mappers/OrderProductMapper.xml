@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.time.demo.mapper.OrderProductMapper">
+    <resultMap id="BaseResultMap"
+               type="com.time.demo.entity.OrderProduct">
+        <id column="OrderProductId" jdbcType="INTEGER"
+            property="orderProductId"/>
+        <result column="OrderId" jdbcType="INTEGER" property="orderId"/>
+        <result column="ProductPicture" jdbcType="VARCHAR"
+                property="productPicture"/>
+        <result column="ProductName" jdbcType="VARCHAR"
+                property="productName"/>
+        <result column="ProductColor" jdbcType="VARCHAR"
+                property="productColor"/>
+        <result column="ProductMount" jdbcType="DOUBLE"
+                property="productMount"/>
+        <result column="ProductNumber" jdbcType="BIGINT"
+                property="productNumber"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+		OrderProductId, OrderId, ProductPicture, ProductName,
+		ProductColor, ProductMount,
+		ProductNumber
+	</sql>
+
+
+    <insert id="insertProductList"
+            parameterType="java.util.ArrayList">
+        insert into mi_order_product (OrderId,
+        ProductPicture,
+        ProductName,
+        ProductColor, ProductMount,
+        ProductNumber)
+        values
+        <foreach collection="list" item="orderProduct" separator=",">
+            (#{orderProduct.orderId,jdbcType=INTEGER},
+            #{orderProduct.productPicture,jdbcType=VARCHAR},
+            #{orderProduct.productName,jdbcType=VARCHAR},
+            #{orderProduct.productColor,jdbcType=VARCHAR},
+            #{orderProduct.productMount,jdbcType=DOUBLE},
+            #{orderProduct.productNumber,jdbcType=BIGINT})
+        </foreach>
+    </insert>
+    <delete id="deleteProductList"
+            parameterType="java.lang.Integer">
+		delete from
+		mi_order_product where OrderId=#{orderId,jdbcType=INTEGER}
+	</delete>
+
+    <update id="updateProductList" parameterType="java.util.ArrayList">
+        <foreach collection="list" item="orderProduct" index="index" separator=";">
+            update mi_order_product
+            <set>
+                <if test="orderProduct.productPicture != null and orderProduct.productPicture !=''">
+                    ProductPicture = #{orderProduct.productPicture,jdbcType=VARCHAR},
+                </if>
+                <if test="orderProduct.productName != null and orderProduct.productName != ''">
+                    ProductName = #{orderProduct.productName,jdbcType=VARCHAR},
+                </if>
+                <if test="orderProduct.productColor != null and orderProduct.productColor != ''">
+                    ProductColor = #{orderProduct.productColor,jdbcType=VARCHAR},
+                </if>
+                <if test="orderProduct.productMount != null and orderProduct.productMount != ''">
+                    ProductMount = #{orderProduct.productMount,jdbcType=DOUBLE},
+                </if>
+                <if test="orderProduct.productNumber != null and orderProduct.productNumber != ''">
+                    ProductNumber = #{orderProduct.productNumber,jdbcType=BIGINT}
+                </if>
+            </set>
+            where OrderId = #{orderProduct.orderId,jdbcType=INTEGER}
+        </foreach>
+    </update>
+</mapper>

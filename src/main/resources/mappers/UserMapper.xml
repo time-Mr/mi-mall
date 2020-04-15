@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.time.demo.mapper.UserMapper">
+    <resultMap id="BaseResultMap"
+               type="com.time.demo.entity.User">
+        <id column="UserId" jdbcType="INTEGER" property="userId"/>
+        <result column="NickName" jdbcType="VARCHAR"
+                property="nickName"/>
+        <result column="UserName" jdbcType="VARCHAR"
+                property="userName"/>
+        <result column="PassWord" jdbcType="VARCHAR"
+                property="passWord"/>
+        <result column="Sex" jdbcType="VARCHAR" property="sex"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+		UserID, NickName, UserName, PassWord, Sex
+	</sql>
+    <select id="selectAllUser" resultMap="BaseResultMap"
+            parameterType="java.util.Map">
+        select
+        <include refid="Base_Column_List"/>
+        from mi_users
+        <where>
+            1 = 1
+            <if test="nickName != null">
+                and NickName like "%"#{nickName}"%"
+            </if>
+            <if test="userName != null">
+                and UserName like "%"#{userName}"%"
+            </if>
+        </where>
+        <if test="start != null and number != null">
+            limit ${(start-1)*number}, ${number}
+        </if>
+    </select>
+    <select id="selectUser"
+            parameterType="com.time.demo.entity.User" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from mi_users
+        where UserName = #{userName,jdbcType=VARCHAR}
+        <if test="passWord != null">
+            and PassWord
+            = #{passWord,jdbcType=VARCHAR}
+        </if>
+    </select>
+    <select id="selectTotalCount" resultType="INTEGER">
+		select
+		count(*)
+		from
+		mi_users
+	</select>
+    <select id="selectByPrimaryKey"
+            parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from mi_users
+        where UserId = #{userId,jdbcType=INTEGER}
+    </select>
+    <insert id="insertSelective"
+            parameterType="com.time.demo.entity.User">
+        insert into mi_users
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                UserId,
+            </if>
+            <if test="nickName != null">
+                NickName,
+            </if>
+            <if test="userName != null">
+                UserName,
+            </if>
+            <if test="passWord != null">
+                PassWord,
+            </if>
+            <if test="sex != null">
+                Sex,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                #{UserId,jdbcType=INTEGER},
+            </if>
+            <if test="nickName != null">
+                #{nickName,jdbcType=VARCHAR},
+            </if>
+            <if test="userName != null">
+                #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="passWord != null">
+                #{passWord,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null">
+                #{Sex,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective"
+            parameterType="com.time.demo.entity.User">
+        update mi_users
+        <set>
+            <if test="nickName != null">
+                NickName = #{nickName,jdbcType=VARCHAR},
+            </if>
+            <if test="userName != null">
+                UserName = #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="passWord != null">
+                PassWord = #{passWord,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null">
+                Sex = #{sex,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where UserId = #{userId,jdbcType=INTEGER}
+    </update>
+
+    <delete id="deleteByUserName" parameterType="string">
+        delete from mi_users
+        where UserName = #{userName,jdbcType=VARCHAR}
+    </delete>
+
+</mapper>

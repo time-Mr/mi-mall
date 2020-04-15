@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.time.demo.mapper.OrderMapper">
+    <resultMap id="BaseResultMap"
+               type="com.time.demo.entity.Order">
+        <id column="OrderId" jdbcType="INTEGER" property="orderId"/>
+        <result column="Owner" jdbcType="VARCHAR" property="owner"/>
+        <result column="OrderStatus" jdbcType="INTEGER"
+                property="orderStatus"/>
+        <result column="CreateTime" jdbcType="DATE"
+                property="createTime"/>
+        <result column="Consign" jdbcType="VARCHAR" property="consign"/>
+        <result column="ConsignPhone" jdbcType="VARCHAR"
+                property="consignPhone"/>
+        <result column="ConsignAddress" jdbcType="VARCHAR"
+                property="consignAddress"/>
+        <result column="OrderNumber" jdbcType="VARCHAR"
+                property="orderNumber"/>
+        <result column="PayMethod" jdbcType="VARCHAR"
+                property="payMethod"/>
+        <result column="NickName" jdbcType="VARCHAR"
+                property="nickName"/>
+
+        <collection ofType="com.time.demo.entity.OrderProduct"
+                    property="productList">
+            <id column="OrderProductId" jdbcType="INTEGER"
+                property="orderProductId"/>
+            <result column="OrderId" jdbcType="INTEGER" property="orderId"/>
+            <result column="ProductPicture" jdbcType="VARCHAR"
+                    property="productPicture"/>
+            <result column="ProductName" jdbcType="VARCHAR"
+                    property="productName"/>
+            <result column="ProductColor" jdbcType="VARCHAR"
+                    property="productColor"/>
+            <result column="ProductMount" jdbcType="DOUBLE"
+                    property="productMount"/>
+            <result column="ProductNumber" jdbcType="BIGINT"
+                    property="productNumber"/>
+        </collection>
+    </resultMap>
+    <sql id="Base_Column_List">
+		OrderId, Owner, OrderStatus, CreateTime, Consign,
+		ConsignPhone,
+		ConsignAddress, OrderNumber,
+		PayMethod,NickName
+	</sql>
+    <sql id="Base_Column_List2">
+		o.OrderId, o.Owner, o.OrderStatus, o.CreateTIme, o.Consign,
+		o.ConsignPhone,
+		o.ConsignAddress, o.OrderNumber,
+		o.PayMethod,o.NickName,
+		p.OrderProductId,p.OrderId,p.ProductPicture,
+		p.ProductName,p.ProductColor,
+		p.ProductMount,p.ProductNumber
+	</sql>
+    <select id="selectByPrimaryKey"
+            parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List2"/>
+        from mi_order o
+        left join mi_order_product p
+        on o.OrderId = p.OrderId
+        where o.OrderId = #{orderId,jdbcType=INTEGER}
+    </select>
+    <select id="selectByUserName" parameterType="java.util.Map"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List2"/>
+        from mi_order o,mi_order_product p
+        where p.OrderId=o.OrderId
+        and Owner =
+        #{userName,jdbcType=VARCHAR}
+        <if test="orderNumber != null">
+            and o.OrderNumber = #{orderNumber,jdbcType=}
+        </if>
+        <if test="product != null">
+            and p.ProductName = #{product,jdbcType=}
+        </if>
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap"
+            parameterType="java.util.Map">
+        select o.* ,p.*
+        from (select * FROM mi_order a
+        <where>
+            1 = 1
+            <if test="owner != null">
+                and Owner like "%"#{owner}"%"
+            </if>
+            <if test="consign != null">
+                and Consign like "%"#{consign}"%"
+            </if>
+            <if test="orderNumber != null">
+                and OrderNumber like "%"#{orderNumber}"%"
+            </if>
+        </where>
+        order by a.OrderId asc
+        <if test="start != null and number != null">
+            limit ${(start-1)*number}, ${number}
+        </if>
+        )as o
+        left
+        join mi_order_product p
+        on p.OrderId = o.OrderId
+        and p.OrderId =0
+        and o.OrderId = 0
+        order by o.OrderId asc,p.Orderid asc
+    </select>
+
+    <select id="selectTotalCount" resultType="INTEGER">
+		select
+		count(*)
+		from
+		mi_order
+	</select>
+    <delete id="deleteByPrimaryKey"
+            parameterType="java.lang.Integer">
+		delete from mi_order
+		where OrderId =
+		#{orderId,jdbcType=INTEGER}
+	</delete>
+
+    <insert id="insertSelective"
+            parameterType="com.time.demo.entity.Order" useGeneratedKeys="true">
+        <selectKey keyProperty="orderId" resultType="int"
+                   order="AFTER">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey>
+        insert into mi_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">
+                OrderId,
+            </if>
+            <if test="owner != null">
+                Owner,
+            </if>
+            <if test="orderStatus != null">
+                OrderStatus,
+            </if>
+            <if test="createTime != null">
+                CreateTime,
+            </if>
+            <if test="consign != null">
+                Consign,
+            </if>
+            <if test="consignPhone != null">
+                ConsignPhone,
+            </if>
+            <if test="consignAddress != null">
+                ConsignAddress,
+            </if>
+            <if test="orderNumber != null">
+                OrderNumber,
+            </if>
+            <if test="payMethod != null">
+                PayMethod,
+            </if>
+            <if test="nickName != null">
+                NickName,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">
+                #{orderId,jdbcType=INTEGER},
+            </if>
+            <if test="owner != null">
+                #{owner,jdbcType=VARCHAR},
+            </if>
+            <if test="orderStatus != null">
+                #{orderStatus,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=DATE},
+            </if>
+            <if test="consign != null">
+                #{consign,jdbcType=VARCHAR},
+            </if>
+            <if test="consignPhone != null">
+                #{consignPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="consignAddress != null">
+                #{consignAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="orderNumber != null">
+                #{orderNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="payMethod != null">
+                #{payMethod,jdbcType=VARCHAR},
+            </if>
+            <if test="nickName != null">
+                #{nickName,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective"
+            parameterType="com.time.demo.entity.Order">
+        update mi_order
+        <set>
+            <if test="owner != null">
+                Owner = #{owner,jdbcType=VARCHAR},
+            </if>
+            <if test="orderStatus != null">
+                OrderStatus = #{orderStatus,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                CreateTIme = #{createTime,jdbcType=DATE},
+            </if>
+            <if test="consign != null">
+                Consign = #{consign,jdbcType=VARCHAR},
+            </if>
+            <if test="consignPhone != null">
+                ConsignPhone = #{consignPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="consignAddress != null">
+                ConsignAddress = #{consignAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="orderNumber != null">
+                OrderNumber = #{orderNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="payMethod != null">
+                PayMethod = #{payMethod,jdbcType=VARCHAR},
+            </if>
+            <if test="nickName != null">
+                NickName = #{nickName,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where OrderId = #{orderId,jdbcType=INTEGER}
+    </update>
+
+</mapper>
